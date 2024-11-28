@@ -1,18 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>myFlix - Docs</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API - Documentation</title>
+    <style>
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      pre {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border: 1px solid #ddd;
+        overflow-x: auto;
+      }
+    </style>
   </head>
   <body>
-    <h1>How to use myFlix API.</h1>
-    <p>
-      To build the server-side component of a “movies” web application. The web
-      application will provide users with access to information about different
-      movies, directors, and genres. Users will be able to sign up, update their
-      personal information, and create a list of their favorite movies.
-    </p>
+    <h1>API Documentation</h1>
+    <h2>Endpoints</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Endpoint Description</th>
+          <th>URL</th>
+          <th>Method</th>
+          <th>Query Parameters</th>
+          <th>Request Body</th>
+          <th>Response Data</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Get a list of all movies</td>
+          <td>/movies</td>
+          <td>GET</td>
+          <td>None</td>
+          <td>None</td>
+          <td>
+            <pre>
+[
+  {
+    "title": "Inception",
+    "genre": { "name": "Thriller", "description": "..." },
+    "director": { "name": "Christopher Nolan", "bio": "...", "birth": "1970" },
+    ...
+  }
+]
+                    </pre
+            >
+          </td>
+        </tr>
+        <tr>
+          <td>Get a movie by title</td>
+          <td>/movies/:title</td>
+          <td>GET</td>
+          <td>title (e.g., Inception)</td>
+          <td>None</td>
+          <td>
+            <pre>
+              {
+                "title": "Inception",
+                "description": "A thief who steals corporate secrets through dream-sharing technology is tasked with planting an idea into the mind of a CEO.",
+                "genre": {
+                    "name": "Science Fiction",
+                    "description": "A genre that explores futuristic concepts like advanced technology, space, and time travel."
+                },
+                "director": {
+                    "name": "Christopher Nolan",
+                    "bio": "An innovative filmmaker known for his mind-bending narratives and visual storytelling.",
+                    "birth": "1970-07-30"
+                },
+                "imageURL": "https://example.com/inception.jpg",
+                "isFeatured": true
+            }
+                    </pre
+            >
+          </td>
+        </tr>
+        <tr>
+          <td>Get a genre by name</td>
+          <td>/movies/genre/:genreName</td>
+          <td>GET</td>
+          <td>genreName (e.g., Thriller)</td>
+          <td>None</td>
+          <td>
+            <pre>
+{
+  "name": "Thriller",
+  "description": "..."
+}
+                    </pre
+            >
+          </td>
+        </tr>
+        <tr>
+          <td>Get a director by name</td>
+          <td>/movies/director/:directorName</td>
+          <td>GET</td>
+          <td>directorName (e.g., Christopher Nolan)</td>
+          <td>None</td>
+          <td>
+            <pre>
+{
+  "name": "Christopher Nolan",
+  "bio": "...",
+  "birth": ""
+}
+                    </pre
+            >
+          </td>
+        </tr>
+        <tr>
+          <td>Register a new user</td>
+          <td>/users</td>
+          <td>POST</td>
+          <td>None</td>
+          <td>
+            <pre>
+{
+  "name": "john_doe",
+  "favouriteMovies": []
+}
+                    </pre
+            >
+          </td>
+          <td>
+            <pre>
+              {
+                "name": "",
+                "favouriteMovies": [],
+                "id": "df54f088-4670-4bc6-bc2a-3c736b666b4f"
+            }
+                    </pre
+            >
+          </td>
+        </tr>
+        <tr>
+          <td>Update username</td>
+          <td>/users/:id</td>
+          <td>PUT</td>
+          <td>id</td>
+          <td>
+            <pre>
+{
+  "name": "john_updated"
+}
+                    </pre
+            >
+          </td>
+          <td>
+            <pre>
+              {
+                "name": "",
+                "favouriteMovies": [],
+                "id": ""
+            }
+                    </pre
+            >
+          </td>
+        </tr>
+        <tr>
+          <td>Add a movie to a user's favorites</td>
+          <td>/users/:id/:movieTitle</td>
+          <td>POST</td>
+          <td>id, movieTitle</td>
+          <td>None</td>
+          <td>
+            <pre>
+{
+  "message": "Movie added to favorites."
+}
+                    </pre
+            >
+          </td>
+        </tr>
+        <tr>
+          <td>Remove a movie from a user's favorites</td>
+          <td>/users/:id/:movieTitle</td>
+          <td>DELETE</td>
+          <td>id, movieTitle</td>
+          <td>None</td>
+          <td>
+            <pre>
+{
+  "message": "Movie removed from favorites."
+}
+                    </pre
+            >
+          </td>
+        </tr>
+        <tr>
+          <td>Delete a user account</td>
+          <td>/users/:id</td>
+          <td>DELETE</td>
+          <td>id</td>
+          <td>None</td>
+          <td>
+            <pre>
+{
+  "message": "User deleted."
+}
+                    </pre
+            >
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </body>
 </html>

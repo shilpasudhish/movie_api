@@ -3,7 +3,8 @@
     "body-parser": "^1.20.3",
     "express": "^4.21.1",
     "loadash": "^1.0.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "uuid": "^11.0.3"
   },
   "name": "movie_api",
   "version": "1.0.0",
