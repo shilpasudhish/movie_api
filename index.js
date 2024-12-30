@@ -1,6 +1,7 @@
 //adding dependencies
 const bodyParser = require("body-parser"),
   _ = require("lodash"),
+  bcrypt = require("bcrypt"),
   mongoose = require("mongoose"),
   Models = require("./model"),
   Movies = Models.Movie,
@@ -8,8 +9,11 @@ const bodyParser = require("body-parser"),
   fs = require("fs"),
   express = require("express"),
   uuid = require("uuid"),
-  morgan = require("morgan");
-const app = express();
+  morgan = require("morgan"),
+  app = express(),
+  cors = require("cors"),
+  { check, validationResult } = require("express-validator");
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 let auth = require("./auth")(app);
@@ -100,39 +104,87 @@ app.get(
 
 //5. post users
 
-app.post("/users", async (req, res) => {
-  await Users.findOne({ username: req.body.username })
-    .then((user) => {
-      if (user) {
-        return res.status(400).send(req.body.username + "already exists");
-      } else {
-        Users.create({
-          username: req.body.username,
-          password: req.body.password,
-          email: req.body.email,
-          birthday: req.body.birthday,
-        })
-          .then((user) => {
-            const safeUser = _.pick(user, ["username", "email", "birthday"]);
-            res.status(201).json(safeUser);
+app.post(
+  "/users",
+  [
+    check("username", "username is required").isLength({ min: 5 }),
+    check(
+      "username",
+      "username contains non alphanumeric characters - not allowed."
+    ).isAlphanumeric(),
+    check("password", "password is required").not().isEmpty(),
+    check("email", "email does not appear to be valid").isEmail(),
+  ],
+  async (req, res) => {
+    // check the validation object for errors
+    let errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    let hashedPassword = Users.hashPassword(req.body.password);
+    await Users.findOne({ username: req.body.username })
+      .then((user) => {
+        if (user) {
+          return res.status(400).send(req.body.username + "already exists");
+        } else {
+          Users.create({
+            username: req.body.username,
+            password: hashedPassword,
+            email: req.body.email,
+            birthday: req.body.birthday,
           })
-          .catch((error) => {
-            console.error(error);
-            res.status(500).send("Error: " + error);
-          });
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).send("Error: " + error);
-    });
-});
+            .then((user) => {
+              const safeUser = _.pick(user, ["username", "email", "birthday"]);
+              res.status(201).json(safeUser);
+            })
+            .catch((error) => {
+              console.error(error);
+              res.status(500).send("Error: " + error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send("Error: " + error);
+      });
+  }
+);
 
 //6 updates users by username
 app.put(
   "/users/:Username",
+  [
+    check(
+      "username",
+      "Username is required and must be at least 5 characters long."
+    )
+      .optional()
+      .isLength({ min: 5 }),
+    check("username", "Username must be alphanumeric.")
+      .optional()
+      .isAlphanumeric(),
+    check("password", "Password must be at least 8 characters long.")
+      .optional()
+      .isLength({ min: 8 }),
+    check(
+      "password",
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character."
+    )
+      .optional()
+      .matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
+      ),
+    check("email", "A valid email is required.").optional().isEmail(),
+    check("birthday", "Birthday must be a valid date.").optional().isISO8601(),
+  ],
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     if (req.user.username !== req.params.Username) {
       return res.status(400).send("Permission denied");
     }
@@ -145,12 +197,18 @@ app.put(
     if (existingUser) {
       return res.status(400).send("Username or email already exists.");
     }
+
+    let hashedPassword = req.body.password;
+    if (req.body.password) {
+      hashedPassword = await bcrypt.hash(req.body.password, 10);
+    }
+
     await Users.findOneAndUpdate(
       { username: req.params.Username }, // Case-insensitive search
       {
         $set: {
           username: req.body.username,
-          password: req.body.password,
+          password: hashedPassword,
           email: req.body.email,
           birthday: req.body.birthday,
         },
@@ -291,8 +349,8 @@ app.get("/users/:Username", async (req, res) => {
 
 //returns static pages
 app.use("/", express.static("public"));
-
-app.listen("8080", (req, res) => {
+const port = process.env.PORT || 8080;
+app.listen(port, "0.0.0.0", () => {
   console.log("server is running");
   fs.appendFile("log.txt", "URL: Timestamp: " + new Date() + "\n\n", (err) => {
     if (err) {
