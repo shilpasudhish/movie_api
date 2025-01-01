@@ -38,9 +38,6 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke!");
 });
 
-//no uri parameter defined
-app.get("/", (req, res) => res.send("The page shows list of movies"));
-
 //1. returns the list of all movies
 app.get(
   "/movies",
@@ -353,7 +350,16 @@ app.get("/users/:Username", async (req, res) => {
 });
 
 //returns static pages
-app.use("/", express.static("public"));
+app.use(express.static("public"));
+app.get("/documentation", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "documentation.html"));
+});
+
+//no uri parameter defined
+app.get("/", (req, res) =>
+  res.send("Welcome to the API. The page shows list of movies")
+);
+
 const port = process.env.PORT || 8080;
 app.listen(port, "0.0.0.0", () => {
   console.log("server is running");
