@@ -19,11 +19,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 let auth = require("./auth")(app);
 const passport = require("passport");
 require("./passport");
+/*localdatabase-connection
 mongoose.connect("mongodb://localhost:27017/MyFlixDb", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-});
+});*/
 
+mongoose.connect(process.env.CONNECTION_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 //logging
 app.use(morgan("common"));
 
