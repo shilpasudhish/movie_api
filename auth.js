@@ -18,6 +18,11 @@ let generateJWTToken = (user) => {
 module.exports = (router) => {
   router.post("/login", (req, res) => {
     console.log("Request body:", req.body);
+    // Decode the URL parameters explicitly
+    const { username, password } = req.query;
+    const decodedUsername = decodeURIComponent(username); // Decode username if it's URL-encoded
+    const decodedPassword = decodeURIComponent(password); // Decode password if it's URL-encoded
+
     passport.authenticate("local", { session: false }, (error, user, info) => {
       if (error || !user) {
         return res.status(400).json({
