@@ -13,7 +13,13 @@ const bodyParser = require("body-parser"),
   app = express(),
   cors = require("cors"),
   { check, validationResult } = require("express-validator");
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:1234", "https://yourfrontend.herokuapp.com"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 let auth = require("./auth")(app);
