@@ -1,18 +1,18 @@
 //adding dependencies
 const bodyParser = require("body-parser"),
-  _ = require("lodash"),
-  bcrypt = require("bcrypt"),
-  mongoose = require("mongoose"),
-  Models = require("./model"),
-  Movies = Models.Movie,
-  Users = Models.User,
-  fs = require("fs"),
-  express = require("express"),
-  uuid = require("uuid"),
-  morgan = require("morgan"),
-  app = express(),
-  cors = require("cors"),
-  { check, validationResult } = require("express-validator");
+_ = require("lodash"),
+bcrypt = require("bcrypt"),
+mongoose = require("mongoose"),
+Models = require("./model"),
+Movies = Models.Movie,
+Users = Models.User,
+fs = require("fs"),
+express = require("express"),
+uuid = require("uuid"),
+morgan = require("morgan"),
+app = express(),
+cors = require("cors"),
+{ check, validationResult } = require("express-validator");
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -38,7 +38,24 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke!");
 });
 
-//1. returns the list of all movies
+/**
+ * GET /movies
+ * 
+ * Retrieves a list of all movies.
+ * 
+ * Authentication: Requires JWT authentication.
+ * 
+ * Response:
+ * - 200: An array of movie objects.
+ * - 500: Error message if there's an issue retrieving movies.
+ * 
+ * @name GetMovies
+ * @function
+ * @memberof module:routes/movies
+ * @inner
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 app.get(
   "/movies",
   passport.authenticate("jwt", { session: false }),
@@ -54,7 +71,25 @@ app.get(
   }
 );
 
-//2. get movie by title
+/**
+ * GET /movies/:title
+ * 
+ * Retrieves a movie by its title.
+ * 
+ * Authentication: Requires JWT authentication.
+ * 
+ * Response:
+ * - 200: A movie object.
+ * - 500: Error message if there's an issue retrieving the movie.
+ * 
+ * @name GetMovieByTitle
+ * @function
+ * @memberof module:routes/movies
+ * @inner
+ * @param {Object} req - Express request object containing the movie title in params.
+ * @param {Object} res - Express response object.
+ */
+
 app.get(
   "/movies/:title",
   passport.authenticate("jwt", { session: false }),
@@ -70,8 +105,24 @@ app.get(
   }
 );
 
-//3. get movies by genre
-
+/**
+ * GET /movies/genre/:genreName
+ * 
+ * Retrieves movies by genre name.
+ * 
+ * Authentication: Requires JWT authentication.
+ * 
+ * Response:
+ * - 200: An array of movie objects.
+ * - 500: Error message if there's an issue retrieving movies.
+ * 
+ * @name GetMoviesByGenre
+ * @function
+ * @memberof module:routes/movies
+ * @inner
+ * @param {Object} req - Express request object containing the genre name in params.
+ * @param {Object} res - Express response object.
+ */
 app.get(
   "/movies/genre/:genreName",
   passport.authenticate("jwt", { session: false }),
@@ -87,7 +138,24 @@ app.get(
   }
 );
 
-//4. get director's data
+/**
+ * GET /movies/director/:directorName
+ * 
+ * Retrieves movies by director name.
+ * 
+ * Authentication: Requires JWT authentication.
+ * 
+ * Response:
+ * - 200: An array of movie objects.
+ * - 500: Error message if there's an issue retrieving movies.
+ * 
+ * @name GetMoviesByDirector
+ * @function
+ * @memberof module:routes/movies
+ * @inner
+ * @param {Object} req - Express request object containing the director name in params.
+ * @param {Object} res - Express response object.
+ */
 
 app.get(
   "/movies/director/:directorName",
@@ -104,7 +172,28 @@ app.get(
   }
 );
 
-//5. post users
+/**
+ * POST /users
+ * 
+ * Registers a new user.
+ * 
+ * Validation:
+ * - Username: Must be at least 5 characters long and alphanumeric.
+ * - Password: Required.
+ * - Email: Must be a valid email format.
+ * 
+ * Response:
+ * - 201: A user object if the registration is successful.
+ * - 400: Error messages if the validation fails or the username/email already exists.
+ * - 500: Error message if there's an issue during registration.
+ * 
+ * @name RegisterUser
+ * @function
+ * @memberof module:routes/users
+ * @inner
+ * @param {Object} req - Express request object containing the new user data in the request body.
+ * @param {Object} res - Express response object.
+ */
 
 app.post(
   "/users",
@@ -154,7 +243,31 @@ app.post(
   }
 );
 
-//6 updates users by username
+/**
+ * PUT /users/:Username
+ * 
+ * Updates an existing user's details.
+ * 
+ * Authentication: Requires JWT authentication.
+ * 
+ * Validation:
+ * - Username: Optional, but must be at least 5 characters long and alphanumeric.
+ * - Password: Optional, but must be at least 8 characters long, containing at least one uppercase letter, one lowercase letter, one number, and one special character.
+ * - Email: Optional, must be a valid email format.
+ * - Birthday: Optional, must be a valid date.
+ * 
+ * Response:
+ * - 200: Updated user object.
+ * - 400: Error message if validation fails or username/email already exists.
+ * - 500: Error message if there's an issue updating the user.
+ * 
+ * @name UpdateUser
+ * @function
+ * @memberof module:routes/users
+ * @inner
+ * @param {Object} req - Express request object containing the updated user data in the request body and the username in the params.
+ * @param {Object} res - Express response object.
+ */
 app.put(
   "/users/:Username",
   [
@@ -236,8 +349,24 @@ app.put(
   }
 );
 
-//7. post favuorite movie by user
-
+/**
+ * POST /users/:Username/movies/:MovieID
+ * 
+ * Adds a movie to a user's favorites.
+ * 
+ * Authentication: Requires JWT authentication.
+ * 
+ * Response:
+ * - 200: Updated user object with the added movie to favorites.
+ * - 500: Error message if there's an issue updating the user's favorites.
+ * 
+ * @name AddMovieToFavorites
+ * @function
+ * @memberof module:routes/users
+ * @inner
+ * @param {Object} req - Express request object containing the movie ID and username in the params.
+ * @param {Object} res - Express response object.
+ */
 app.post(
   "/users/:Username/movies/:MovieID",
   passport.authenticate("jwt", { session: false }),
@@ -268,8 +397,24 @@ app.post(
   }
 );
 
-//8. delete a movie from favorites of a user
-
+/**
+ * DELETE /users/:Username/movies/:MovieID
+ * 
+ * Removes a movie from a user's favorites.
+ * 
+ * Authentication: Requires JWT authentication.
+ * 
+ * Response:
+ * - 200: Updated user object with the removed movie from favorites.
+ * - 500: Error message if there's an issue updating the user's favorites.
+ * 
+ * @name RemoveMovieFromFavorites
+ * @function
+ * @memberof module:routes/users
+ * @inner
+ * @param {Object} req - Express request object containing the movie ID and username in the params.
+ * @param {Object} res - Express response object.
+ */
 app.delete(
   "/users/:Username/movies/:MovieID",
   passport.authenticate("jwt", { session: false }),
@@ -300,8 +445,24 @@ app.delete(
   }
 );
 
-//9. delete user
-
+/**
+ * DELETE /users/:Username
+ * 
+ * Deletes a user account.
+ * 
+ * Authentication: Requires JWT authentication.
+ * 
+ * Response:
+ * - 200: Confirmation message that the user was deleted.
+ * - 500: Error message if there's an issue deleting the user.
+ * 
+ * @name DeleteUser
+ * @function
+ * @memberof module:routes/users
+ * @inner
+ * @param {Object} req - Express request object containing the username in the params.
+ * @param {Object} res - Express response object.
+ */
 app.delete(
   "/users/:Username",
   passport.authenticate("jwt", { session: false }),
@@ -337,7 +498,26 @@ app.get("/users", async (req, res) => {
     });
 });
 
-//11 get users by username
+/**
+ * GET /users/:Username
+ * 
+ * Retrieves a user by username.
+ * 
+ * Authentication:
+ * Requires JWT authentication.
+ * 
+ * Response:
+ * - 200: User object.
+ * - 400: Error message if the user is not found.
+ * - 500: Error message if there's an issue retrieving the user.
+ * 
+ * @name GetUserByUsername
+ * @function
+ * @memberof module:routes/users
+ * @inner
+ * @param {Object} req - Express request object containing the username in params.
+ * @param {Object} res - Express response object.
+ */
 app.get("/users/:Username", async (req, res) => {
   await Users.findOne({ username: req.params.Username })
     .then((user) => {

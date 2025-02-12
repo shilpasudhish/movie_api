@@ -1,0 +1,19 @@
+{
+    "source": {
+      "include": ["index.js"], 
+      "exclude": ["node_modules"]
+    },
+    "opts": {
+      "destination": "./docs", 
+      "recurse": true,
+      "template": "node_modules/docdash"
+    },
+    "plugins": ["plugins/markdown"],
+    "templates": {
+      "cleverLinks": true,
+      "monospaceLinks": true,
+      "default": {
+        "outputSourceFiles": true
+      }
+    }
+  }

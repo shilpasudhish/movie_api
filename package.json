@@ -25,5 +25,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "docdash": "^2.0.2",
+    "jsdoc": "^4.0.4"
+  }
 }
